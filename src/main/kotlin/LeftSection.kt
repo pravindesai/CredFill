@@ -34,7 +34,6 @@ fun LeftSection(
 
     var addNewProjectDialog by remember { mutableStateOf(false) }
     var addNewCredentialsDialog by remember { mutableStateOf(false) }
-    var selectedProject: String? by remember(selectedProjectName) { mutableStateOf(selectedProjectName) }
 
 
     if (addNewProjectDialog) {
@@ -106,7 +105,7 @@ fun LeftSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.AddCircle,
+                    imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Add New Credentials",
                 )
                 Spacer(modifier = Modifier.width(5.dp))
@@ -116,6 +115,10 @@ fun LeftSection(
             }
         }
 
+        Spacer(modifier = Modifier.height(10.dp))
+        Divider(
+            modifier = Modifier.fillMaxWidth().height(1.dp).padding(horizontal = 10.dp).background(color = Color.Gray)
+        )
         Spacer(modifier = Modifier.height(10.dp))
 
         Row(
@@ -208,7 +211,7 @@ fun LeftSection(
                     Card(
                         modifier = Modifier.padding(vertical = 3.dp, horizontal = 3.dp).fillMaxWidth()
                             .wrapContentHeight().clickable {
-                            selectedProject = project
+//                            selectedProject = project
                             selectProject(project)
                         },
                         shape = RoundedCornerShape(8.dp),
@@ -220,9 +223,9 @@ fun LeftSection(
                             horizontalArrangement = Arrangement.Start
                         ) {
                             RadioButton(
-                                selected = project.equals(selectedProject),
+                                selected = project.equals(selectedProjectName),
                                 onClick = {
-                                    selectedProject = project
+//                                    selectedProject = project
                                     selectProject(project)
                                 }
                             )

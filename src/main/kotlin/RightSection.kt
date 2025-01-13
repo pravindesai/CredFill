@@ -7,6 +7,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateMap
@@ -22,9 +24,47 @@ import androidx.compose.ui.unit.sp
 fun RightSection(
     modifier: Modifier = Modifier,
     showAllPassword: Boolean = false,
+    selectedProjectName: String? = null,
     projectCreds: List<Pair<String, String>>,
-    onSendCredentials:(Pair<String, String>) -> Unit = {}
+    onSendCredentials:(Pair<String, String>) -> Unit = {},
+    onChangeFocusable: (isFocusable: Boolean) -> Unit = {},
+    onDeleteCredentials:(Pair<String?, Pair<String, String>?>) -> Unit = {},
+    onEditCredentials:(Pair<String?, Pair<String, String>?>, oldCred:Pair<String, String>?) -> Unit = {_,_ ->},
 ) {
+    var selectedCredes:Pair<String, String>? by remember { mutableStateOf(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog){
+        SimpleAlertDialog(
+            title = "Are you sure you want to delete this credentials from ${selectedProjectName} ?",
+            onDismiss = {
+                showDeleteDialog = false
+                onChangeFocusable(false)
+            }, onConfirm = {
+                showDeleteDialog  = false
+                onChangeFocusable(false)
+                onDeleteCredentials(Pair(selectedProjectName, selectedCredes))
+            }
+        )
+    }
+
+    if (showEditDialog){
+        CreateNewCredentialsDialog(
+            modifier = Modifier,
+            editView = true,
+            selectedCredes = selectedCredes,
+            projects = listOf(selectedProjectName?:""),
+            onDismiss = {
+                showEditDialog = false
+                onChangeFocusable(false)
+            }, onSave = { project, s, s2 ->
+                showEditDialog = false
+                onChangeFocusable(false)
+                onEditCredentials(Pair(project, Pair(s, s2)), selectedCredes)
+            }
+        )
+    }
 
     if (projectCreds.isEmpty()){
         Column(
@@ -40,7 +80,7 @@ fun RightSection(
         ) {
             projectCreds.forEach { cred ->
                 item {
-                    var showThisCreds by remember { mutableStateOf(false) }
+                    var showThisCreds by remember(showAllPassword) { mutableStateOf(showAllPassword) }
                     Card(
                         modifier = Modifier.wrapContentWidth().padding(vertical = 5.dp, horizontal = 10.dp),
                         border = BorderStroke(width = 0.5.dp, color = Color.Gray.copy(alpha = 0.5f))
@@ -83,8 +123,41 @@ fun RightSection(
                                 }
                             }
 
+                            Column(
+                                modifier = Modifier.wrapContentSize(),
+                                verticalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(20.dp).clickable {
+                                        selectedCredes = cred
+                                        showEditDialog = true
+                                        onChangeFocusable(true)
+                                    },
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit",
+                                    tint = Color.Blue
+                                )
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Icon(
+                                    modifier = Modifier.size(20.dp).clickable {
+                                        selectedCredes = cred
+                                        showDeleteDialog = true
+                                        onChangeFocusable(true)
+                                    },
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    tint = Color.Red
+                                )
+
+                            }
+
+                            Spacer(modifier = Modifier.width(15.dp))
+
                             Icon(
                                 modifier = Modifier.size(30.dp).clickable {
+                                    selectedCredes = cred
                                     onSendCredentials(cred)
                                 },
                                 imageVector = Icons.AutoMirrored.Filled.Send,

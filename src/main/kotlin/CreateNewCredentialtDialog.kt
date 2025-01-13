@@ -17,12 +17,14 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CreateNewCredentialsDialog(
     modifier: Modifier = Modifier,
+    editView:Boolean = false,
+    selectedCredes:Pair<String, String>? = null,
     projects:List<String>,
     onDismiss:() -> Unit = {},
     onSave:(project:String, s1:String, s2:String) -> Unit = {_,_,_ ->}
 ) {
-    var inputText by remember { mutableStateOf("") }
-    var inputText2 by remember { mutableStateOf("") }
+    var inputText by remember { mutableStateOf(selectedCredes?.first?:"") }
+    var inputText2 by remember { mutableStateOf(selectedCredes?.second?:"") }
 
     var selectedProject by remember { mutableStateOf(projects.firstOrNull() ?: "") }
     var expanded by remember { mutableStateOf(false) }
@@ -54,15 +56,18 @@ fun CreateNewCredentialsDialog(
             Column(modifier = Modifier) {
 
                 //add dropdown spinner for projects here
-                Text(text = "Select Project", style = MaterialTheme.typography.body1)
+                Text(text = if (editView) "Project" else "Select Project", style = MaterialTheme.typography.body1)
                 Box(modifier = Modifier.fillMaxWidth().clickable {
-                    expanded = true
+                    if (editView.not()){
+                        expanded = true
+                    }
                 }) {
 
                     Card(
                         modifier = Modifier.fillMaxWidth().clickable {
-                            expanded = true
-                        },
+                            if (editView.not()){
+                                expanded = true
+                            }                        },
                         shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(0.5.dp, color = Color.Gray)
                     ) {

@@ -1,14 +1,25 @@
 import androidx.compose.runtime.*
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 
-class AppViewModel {
+class AppViewModel : ViewModel(){
 
+    private var _projectAndCredMap = MutableStateFlow<Map<String, List<Pair<String, String>>>>(mapOf())
+    val projectAndCredMap = _projectAndCredMap.asStateFlow()
 
+    private var _selectedProject = MutableStateFlow<String?>(null)
+    var selectedProject = _selectedProject.asStateFlow()
 
-    var _projectAndCredMap = MutableStateFlow<Map<String, List<Pair<String, String>>>>(mapOf())
+    private var _showAllPassword = MutableStateFlow<Boolean>(false)
+    val showAllPassword = _showAllPassword.asStateFlow()
 
-    var _selectedProject = MutableStateFlow<String?>(null)
+    private var _duplicateProjectError = MutableStateFlow<Boolean>(false)
+    val duplicateProjectError = _duplicateProjectError.asStateFlow()
+
+    private var _duplicateEmailError = MutableStateFlow<Boolean>(false)
+    val duplicateEmailError = _duplicateEmailError.asStateFlow()
 
 
     init {
@@ -61,6 +72,75 @@ class AppViewModel {
         _selectedProject.value = _projectAndCredMap.value.keys.firstOrNull()
 
 
+    }
+
+    fun updateShowPasswordFlag(showPass:Boolean){
+        _showAllPassword.value  = showPass
+    }
+
+    fun updateSelectedProject(selectedProject:String){
+        _selectedProject.value = selectedProject
+    }
+
+    fun addProject(project:String){
+        if (_projectAndCredMap.value.keys.contains(project)){
+            _duplicateProjectError.value  = true
+            return
+        }
+        val map = _projectAndCredMap.value.toMutableMap()
+        map[project] = map[project] ?: emptyList()
+        _projectAndCredMap.value = map
+
+    }
+
+    fun addCreds(project:String, cred:Pair<String, String>){
+
+        if (_projectAndCredMap.value[project]?.any { it.first.equals(cred.first) } == true){
+            _duplicateEmailError.value  = true
+            return
+        }
+
+
+        val allCredsForProject = (_projectAndCredMap.value.get(project) ?: emptyList()).toMutableList()
+        allCredsForProject.add(cred)
+        val map = projectAndCredMap.value.toMutableMap()
+        map[project] = allCredsForProject
+        _projectAndCredMap.value = map
+    }
+
+    fun importDb(){
+
+    }
+
+    fun exportDb(){
+
+    }
+
+    fun removeCreds(projectCred: Pair<String?, Pair<String, String>?>) {
+        var allCredsForProject = (_projectAndCredMap.value.get(projectCred.first?:"") ?: emptyList()).toMutableList()
+        allCredsForProject = allCredsForProject.filterNot { it.first.equals(projectCred.second?.first, ignoreCase = false) }.toMutableList()
+        val map = projectAndCredMap.value.toMutableMap()
+        map[projectCred.first?:""] = allCredsForProject
+        _projectAndCredMap.value = map
+
+    }
+
+    fun editCreds(projectCred: Pair<String?, Pair<String, String>?>, oldCreds:Pair<String, String>?) {
+        var allCredsForProject = (_projectAndCredMap.value.get(projectCred.first?:"") ?: emptyList()).toMutableList()
+        allCredsForProject = allCredsForProject.filterNot { it.first.equals(oldCreds?.first, ignoreCase = false) }.toMutableList()
+
+        projectCred.second?.let { allCredsForProject.add(it) }
+
+        val map = projectAndCredMap.value.toMutableMap()
+
+        map[projectCred.first?:""] = allCredsForProject
+        _projectAndCredMap.value = map
+
+    }
+
+    fun clearError(){
+        _duplicateEmailError.value = false
+        _duplicateProjectError.value = false
     }
 
 }
