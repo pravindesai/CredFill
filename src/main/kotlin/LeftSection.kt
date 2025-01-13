@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LeftSection(
     modifier: Modifier = Modifier,
@@ -189,15 +190,16 @@ fun LeftSection(
                 Color.Red.copy(alpha = 0.05f)
             }else{
                 Color.Green.copy(alpha = 0.05f)
-            }).padding(horizontal = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+            }).padding(horizontal = 6.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text("Show All Passwords", modifier = Modifier.weight(1f))
-                Switch(
-                    checked = showAllPassword,
-                    onCheckedChange = { show ->
-                        onShowAllPasswordChanged(show)
-                    }
-
-                )
+                CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                    Switch(
+                        checked = showAllPassword,
+                        onCheckedChange = { show ->
+                            onShowAllPasswordChanged(show)
+                        }
+                    )
+                }
             }
         }
 
@@ -232,14 +234,18 @@ fun LeftSection(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Start
                         ) {
-                            RadioButton(
-                                selected = project.equals(selectedProjectName),
-                                onClick = {
+                            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                                RadioButton(
+                                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 5.dp),
+                                    selected = project.equals(selectedProjectName),
+                                    onClick = {
 //                                    selectedProject = project
-                                    selectProject(project)
-                                }
-                            )
-                            Text(project, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                                        selectProject(project)
+                                    }
+                                )
+                            }
+
+                            Text(project, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }

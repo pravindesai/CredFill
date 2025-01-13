@@ -11,7 +11,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "Cred Fill - Test credential manager for developers",
-        state = rememberWindowState(width = 700.dp, height = 600.dp),
+        state = rememberWindowState(width = 680.dp, height = 650.dp),
         resizable = false,
         focusable = focusabled,
         alwaysOnTop = true

@@ -2,24 +2,25 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RightSection(
     modifier: Modifier = Modifier,
@@ -34,6 +35,7 @@ fun RightSection(
     var selectedCredes:Pair<String, String>? by remember { mutableStateOf(null) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
+    var inputSearchText by remember { mutableStateOf("") }
 
     if (showDeleteDialog){
         SimpleAlertDialog(
@@ -75,96 +77,96 @@ fun RightSection(
             Text("Empty !!", modifier = Modifier, fontWeight = FontWeight.Medium, fontSize = 18.sp)
         }
     }else{
-        LazyColumn(
-            modifier = modifier.padding(top = 10.dp, bottom = 10.dp)
-        ) {
-            projectCreds.forEach { cred ->
-                item {
-                    var showThisCreds by remember(showAllPassword) { mutableStateOf(showAllPassword) }
-                    Card(
-                        modifier = Modifier.wrapContentWidth().padding(vertical = 5.dp, horizontal = 10.dp),
-                        border = BorderStroke(width = 0.5.dp, color = Color.Gray.copy(alpha = 0.5f))
-                    ) {
-                        Row(modifier = Modifier.padding(10.dp).wrapContentWidth().wrapContentHeight(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier = modifier.padding(top = 10.dp, bottom = 10.dp)) {
+            LazyColumn() {
+                projectCreds.forEach { cred ->
+                    item {
+                        var showThisCreds by remember(showAllPassword) { mutableStateOf(showAllPassword) }
+                        Card(
+                            modifier = Modifier.wrapContentWidth().padding(vertical = 5.dp, horizontal = 10.dp),
+                            border = BorderStroke(width = 0.5.dp, color = Color.Gray.copy(alpha = 0.5f))
+                        ) {
+                            Row(modifier = Modifier.padding(8.dp).wrapContentWidth().wrapContentHeight(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween) {
 
-                            Column(
-                                modifier = Modifier.weight(1f).wrapContentHeight(),
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(cred.first, modifier = Modifier, fontWeight = FontWeight.Medium, fontSize = 18.sp)
-                                Spacer(modifier = Modifier.height(5.dp))
-                                Row(
-                                    modifier = Modifier.wrapContentHeight(),
-                                    verticalAlignment = Alignment.CenterVertically
+                                Column(
+                                    modifier = Modifier.weight(1f).wrapContentHeight(),
+                                    verticalArrangement = Arrangement.Center
                                 ) {
-                                    Text(if (showAllPassword || showThisCreds){
-                                        cred.second
-                                    }else {
-                                        "*".repeat(cred.second.length)
-                                    }, modifier = Modifier, textAlign = TextAlign.Center, fontWeight = FontWeight.Normal, fontSize = 18.sp)
-
-                                    if (showAllPassword.not()){
-                                        Spacer(modifier = Modifier.width(10.dp))
-
-                                        Text(if (showThisCreds){
-                                            "hide"
+                                    Text(cred.first, modifier = Modifier, fontWeight = FontWeight.Medium, fontSize = 16.sp)
+                                    Spacer(modifier = Modifier.height(3.dp))
+                                    Row(
+                                        modifier = Modifier.wrapContentHeight(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(if (showAllPassword || showThisCreds){
+                                            cred.second
                                         }else {
-                                            "show"
-                                        }, modifier = Modifier.clickable {
-                                            showThisCreds = showThisCreds.not()
-                                        }, textAlign = TextAlign.Center,
-                                            fontWeight = FontWeight.Normal,
-                                            fontSize = 12.sp,
-                                            color = Color.Blue
-                                        )
+                                            "*".repeat(cred.second.length)
+                                        }, modifier = Modifier, textAlign = TextAlign.Center, fontWeight = FontWeight.Normal, fontSize = 14.sp)
+
+                                        if (showAllPassword.not()){
+                                            Spacer(modifier = Modifier.width(10.dp))
+
+                                            Text(if (showThisCreds){
+                                                "hide"
+                                            }else {
+                                                "show"
+                                            }, modifier = Modifier.clickable {
+                                                showThisCreds = showThisCreds.not()
+                                            }, textAlign = TextAlign.Center,
+                                                fontWeight = FontWeight.Normal,
+                                                fontSize = 12.sp,
+                                                color = Color.Blue
+                                            )
+                                        }
                                     }
                                 }
-                            }
 
-                            Column(
-                                modifier = Modifier.wrapContentSize(),
-                                verticalArrangement = Arrangement.SpaceBetween
-                            ) {
+                                Column(
+                                    modifier = Modifier.wrapContentSize(),
+                                    verticalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.size(15.dp).clickable {
+                                            selectedCredes = cred
+                                            showEditDialog = true
+                                            onChangeFocusable(true)
+                                        },
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = "Edit",
+                                        tint = Color.Blue
+                                    )
+
+                                    Spacer(modifier = Modifier.height(7.dp))
+
+                                    Icon(
+                                        modifier = Modifier.size(15.dp).clickable {
+                                            selectedCredes = cred
+                                            showDeleteDialog = true
+                                            onChangeFocusable(true)
+                                        },
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete",
+                                        tint = Color.Red
+                                    )
+
+                                }
+
+                                Spacer(modifier = Modifier.width(15.dp))
+
                                 Icon(
                                     modifier = Modifier.size(20.dp).clickable {
                                         selectedCredes = cred
-                                        showEditDialog = true
-                                        onChangeFocusable(true)
+                                        onSendCredentials(cred)
                                     },
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit",
-                                    tint = Color.Blue
-                                )
-
-                                Spacer(modifier = Modifier.height(10.dp))
-
-                                Icon(
-                                    modifier = Modifier.size(20.dp).clickable {
-                                        selectedCredes = cred
-                                        showDeleteDialog = true
-                                        onChangeFocusable(true)
-                                    },
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Delete",
-                                    tint = Color.Red
+                                    imageVector = Icons.AutoMirrored.Filled.Send,
+                                    contentDescription = "ENTER THIS CREDENTIALS",
+                                    tint = Color.Gray
                                 )
 
                             }
-
-                            Spacer(modifier = Modifier.width(15.dp))
-
-                            Icon(
-                                modifier = Modifier.size(30.dp).clickable {
-                                    selectedCredes = cred
-                                    onSendCredentials(cred)
-                                },
-                                imageVector = Icons.AutoMirrored.Filled.Send,
-                                contentDescription = "ENTER THIS CREDENTIALS",
-                                tint = Color.Gray
-                            )
-
                         }
                     }
                 }

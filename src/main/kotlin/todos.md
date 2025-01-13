@@ -1,13 +1,9 @@
 
-store data in json
 
-import export data/json
-
-Highlight Active Project: Use more prominent colors or icons to indicate the currently active project.
-
-Adding a search or filter option for credentials and project
 
 Quick Copy Button: Add a copy icon next to the email and password for instant copying to the clipboard. with 'copied' toast
+
+Adding a search or filter option for credentials and project
 
 Favorites/Pinning: Let users pin frequently used credentials to the top of the list for quick access.
 
