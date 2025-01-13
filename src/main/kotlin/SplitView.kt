@@ -10,6 +10,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.io.File
+import javax.swing.JFileChooser
+import javax.swing.filechooser.FileNameExtensionFilter
 
 object GlobalScopeViewModel{
     val appViewModel: AppViewModel = AppViewModel()
@@ -22,13 +25,57 @@ fun SplitView(modifier: Modifier = Modifier, windowSize: IntSize? = null,
               onSendCredentials:(Pair<String, String>) -> Unit = {},
               onChangeFocusable:(isFocusable:Boolean) -> Unit = {}) {
 
-//    val appViewModel = GlobalScopeViewModel.appViewModel
+    // View model states
     val projectAndCredMap = appViewModel.projectAndCredMap.collectAsState()
     val selectedProject = appViewModel.selectedProject.collectAsState()
     val showAllPassword = appViewModel.showAllPassword.collectAsState()
 
     val duplicateEmailError = appViewModel.duplicateEmailError.collectAsState()
     val duplicateProjectError = appViewModel.duplicateProjectError.collectAsState()
+    val export = appViewModel.export.collectAsState()
+    val import = appViewModel.import.collectAsState()
+    val error = appViewModel.error.collectAsState()
+
+    // Local states
+    var selectedFilePath:String? by remember { mutableStateOf(null) }
+
+
+    if (error.value.isNullOrBlank().not()){
+            SimpleAlertDialog(
+            title = "${error.value}",
+            hidePositiveButton = true,
+            negativeButtonText = "OK",
+            onDismiss = {
+               appViewModel.clearError()
+            }, onConfirm = {
+                appViewModel.clearError()
+            }
+        )
+    }
+    if (export.value){
+        SimpleAlertDialog(
+            title = "Data exported successfully !! \nPlease check Downloads folder.",
+            hidePositiveButton = true,
+            negativeButtonText = "OK",
+            onDismiss = {
+               appViewModel.clearError()
+            }, onConfirm = {
+                appViewModel.clearError()
+            }
+        )
+    }
+    if (import.value){
+        SimpleAlertDialog(
+            title = "Data imported successfully !!",
+            hidePositiveButton = true,
+            negativeButtonText = "OK",
+            onDismiss = {
+               appViewModel.clearError()
+            }, onConfirm = {
+                appViewModel.clearError()
+            }
+        )
+    }
 
     if (duplicateProjectError.value){
         SimpleAlertDialog(
@@ -36,7 +83,7 @@ fun SplitView(modifier: Modifier = Modifier, windowSize: IntSize? = null,
             hidePositiveButton = true,
             negativeButtonText = "OK",
             onDismiss = {
-               appViewModel.clearError()
+                appViewModel.clearError()
             }, onConfirm = {
                 appViewModel.clearError()
             }
@@ -85,7 +132,22 @@ fun SplitView(modifier: Modifier = Modifier, windowSize: IntSize? = null,
             }, onShowAllPasswordChanged = { show ->
                 appViewModel.updateShowPasswordFlag(show)
             }, onImportDb = {
-                appViewModel.importDb()
+                val fileChooser = JFileChooser()
+                fileChooser.dialogTitle = "Select a File to import data."
+                fileChooser.currentDirectory = getDownloadsFolder()
+                val jsonFilter = FileNameExtensionFilter("JSON Files (*.json)", "json")
+                fileChooser.fileFilter = jsonFilter
+
+                val userSelection = fileChooser.showOpenDialog(null)
+
+                if (userSelection == JFileChooser.APPROVE_OPTION) {
+                    val selectedFile: File = fileChooser.selectedFile
+                    selectedFilePath = "Selected file: ${selectedFile.absolutePath}"
+                    appViewModel.importDb(selectedFile.absolutePath)
+                } else {
+                    selectedFilePath = null
+                }
+                println(selectedFilePath)
             }, onExportDb = {
                 appViewModel.exportDb()
             }
@@ -108,4 +170,9 @@ fun SplitView(modifier: Modifier = Modifier, windowSize: IntSize? = null,
         )
     }
 
+}
+
+fun getDownloadsFolder(): File {
+    val userHome = System.getProperty("user.home")
+    return File("$userHome/Downloads")
 }

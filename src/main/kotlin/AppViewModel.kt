@@ -1,10 +1,13 @@
-import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class AppViewModel : ViewModel(){
+
+    private val appRepository = AppRepository()
 
     private var _projectAndCredMap = MutableStateFlow<Map<String, List<Pair<String, String>>>>(mapOf())
     val projectAndCredMap = _projectAndCredMap.asStateFlow()
@@ -21,57 +24,21 @@ class AppViewModel : ViewModel(){
     private var _duplicateEmailError = MutableStateFlow<Boolean>(false)
     val duplicateEmailError = _duplicateEmailError.asStateFlow()
 
+    private var _loading = MutableStateFlow<Boolean>(false)
+    val loading = _loading.asStateFlow()
+
+    private var _export = MutableStateFlow<Boolean>(false)
+    val export = _export.asStateFlow()
+
+    private var _import = MutableStateFlow<Boolean>(false)
+    val import = _import.asStateFlow()
+
+    private var _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
+
 
     init {
-        val map = mutableMapOf<String, List<Pair<String, String>>>()
-        map.put(
-            "project1", listOf(
-                Pair("user1@example.com", "Password123"),
-                Pair("user2@example.com", "Password456"),
-                Pair("user3@example.com", "Password789"),
-                Pair("user4@example.com", "Password321"),
-                Pair("user5@example.com", "Password654"),
-                Pair("user6@example.com", "Password987"),
-                Pair("user7@example.com", "Password111"),
-                Pair("user9@example.com", "Password123"),
-                Pair("user9@example.com", "Password456"),
-                Pair("user10@example.com", "Password789"),
-                Pair("user11@example.com", "Password321"),
-                Pair("user12@example.com", "Password654"),
-                Pair("user13@example.com", "Password987"),
-                Pair("user14@example.com", "Password111")
-            )
-        )
-
-// Adding data for project2
-        map.put(
-            "project2", listOf(
-                Pair("user8@example.com", "Password222"),
-                Pair("user9@example.com", "Password333"),
-                Pair("user10@example.com", "Password444"),
-                Pair("user11@example.com", "Password555"),
-                Pair("user12@example.com", "Password666"),
-                Pair("user13@example.com", "Password777"),
-                Pair("user14@example.com", "Password888")
-            )
-        )
-
-// Adding data for project3
-        map.put(
-            "project3", listOf(
-                Pair("user15@example.com", "Password999"),
-                Pair("user16@example.com", "Password000"),
-                Pair("user17@example.com", "Password101"),
-                Pair("user18@example.com", "Password202"),
-                Pair("user19@example.com", "Password303"),
-                Pair("user20@example.com", "Password404")
-            )
-        )
-
-        _projectAndCredMap.value = map
-        _selectedProject.value = _projectAndCredMap.value.keys.firstOrNull()
-
-
+        readFile()
     }
 
     fun updateShowPasswordFlag(showPass:Boolean){
@@ -91,6 +58,8 @@ class AppViewModel : ViewModel(){
         map[project] = map[project] ?: emptyList()
         _projectAndCredMap.value = map
 
+        writeToFile()
+
     }
 
     fun addCreds(project:String, cred:Pair<String, String>){
@@ -106,14 +75,8 @@ class AppViewModel : ViewModel(){
         val map = projectAndCredMap.value.toMutableMap()
         map[project] = allCredsForProject
         _projectAndCredMap.value = map
-    }
 
-    fun importDb(){
-
-    }
-
-    fun exportDb(){
-
+        writeToFile()
     }
 
     fun removeCreds(projectCred: Pair<String?, Pair<String, String>?>) {
@@ -122,7 +85,7 @@ class AppViewModel : ViewModel(){
         val map = projectAndCredMap.value.toMutableMap()
         map[projectCred.first?:""] = allCredsForProject
         _projectAndCredMap.value = map
-
+        writeToFile()
     }
 
     fun editCreds(projectCred: Pair<String?, Pair<String, String>?>, oldCreds:Pair<String, String>?) {
@@ -136,11 +99,57 @@ class AppViewModel : ViewModel(){
         map[projectCred.first?:""] = allCredsForProject
         _projectAndCredMap.value = map
 
+        writeToFile()
     }
 
     fun clearError(){
         _duplicateEmailError.value = false
         _duplicateProjectError.value = false
+        _export.value = false
+        _import.value = false
+        _error.value = null
+    }
+
+    private fun writeToFile(){
+        viewModelScope.launch(Dispatchers.IO) {
+            _loading.value = true
+            appRepository.writeToFile(_projectAndCredMap.value)
+            _loading.value = false
+        }
+    }
+
+    private fun readFile(){
+        viewModelScope.launch(Dispatchers.IO) {
+            _loading.value = true
+            _projectAndCredMap.value = appRepository.readFile()
+
+            if (_selectedProject.value.isNullOrBlank()){
+                _selectedProject.value = _projectAndCredMap.value.keys.firstOrNull()
+            }
+            _loading.value = false
+        }
+    }
+
+    fun importDb(fileToImport:String){
+        viewModelScope.launch(Dispatchers.IO) {
+            _loading.value = true
+            _import.value = appRepository.uploadDB(fileToImport)
+            if (_import.value){
+                readFile()
+            }else{
+                _error.value = "Failed to import data base.\nPlease verify integrity of data."
+            }
+            _loading.value = false
+
+        }
+    }
+
+    fun exportDb(){
+        viewModelScope.launch(Dispatchers.IO) {
+            _loading.value = true
+            _export.value = appRepository.downloadDB()
+            _loading.value = false
+        }
     }
 
 }

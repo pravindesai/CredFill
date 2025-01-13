@@ -215,10 +215,11 @@ fun LeftSection(
                             selectProject(project)
                         },
                         shape = RoundedCornerShape(8.dp),
-                        border = BorderStroke(0.5.dp, color = Color.Gray)
+                        border = BorderStroke(0.5.dp, color = Color.Gray),
+
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                            modifier = Modifier.fillMaxWidth().wrapContentHeight().background(color = if(project.equals(selectedProjectName)) Color.Green.copy(alpha = 0.1f) else Color.White),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Start
                         ) {
