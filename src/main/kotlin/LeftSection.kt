@@ -74,6 +74,7 @@ fun LeftSection(
                 addNewProjectDialog = true
                 onChangeFocusable(true)
             },
+            shape = RoundedCornerShape(8.dp),
             border = BorderStroke(0.5.dp, color = Color.Gray)
         ) {
             Row(
@@ -98,6 +99,7 @@ fun LeftSection(
                 addNewCredentialsDialog = true
                 onChangeFocusable(true)
             },
+            shape = RoundedCornerShape(8.dp),
             border = BorderStroke(0.5.dp, color = Color.Gray)
         ) {
             Row(
@@ -130,6 +132,7 @@ fun LeftSection(
                 modifier = Modifier.weight(1f).clickable {
                     onImportDb()
                 },
+                shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(0.5.dp, color = Color.Gray)
             ) {
                 Column(
@@ -153,6 +156,7 @@ fun LeftSection(
                 modifier = Modifier.weight(1f).clickable {
                     onExportDb()
                 },
+                shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(0.5.dp, color = Color.Gray)
             ) {
                 Column(
@@ -178,9 +182,14 @@ fun LeftSection(
             modifier = Modifier.clickable {
                 onShowAllPasswordChanged(showAllPassword.not())
             },
+            shape = RoundedCornerShape(8.dp),
             border = BorderStroke(0.5.dp, color = Color.Gray)
         ){
-            Row(modifier = Modifier.padding(horizontal = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.background(color = if (showAllPassword){
+                Color.Red.copy(alpha = 0.05f)
+            }else{
+                Color.Green.copy(alpha = 0.05f)
+            }).padding(horizontal = 5.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text("Show All Passwords", modifier = Modifier.weight(1f))
                 Switch(
                     checked = showAllPassword,
@@ -219,7 +228,7 @@ fun LeftSection(
 
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth().wrapContentHeight().background(color = if(project.equals(selectedProjectName)) Color.Green.copy(alpha = 0.1f) else Color.White),
+                            modifier = Modifier.fillMaxWidth().wrapContentHeight().background(color = if(project.equals(selectedProjectName)) Color.Green.copy(alpha = 0.05f) else Color.White),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Start
                         ) {
