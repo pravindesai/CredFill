@@ -24,6 +24,7 @@ dependencies {
     implementation(compose.materialIconsExtended)
     implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("org.jetbrains.compose.desktop:desktop:1.5.0") // Compose Desktop library
 
 }
 
