@@ -14,7 +14,7 @@ fun main() = application {
         state = rememberWindowState(width = 680.dp, height = 650.dp),
         resizable = false,
         focusable = focusabled,
-        alwaysOnTop = true
+        alwaysOnTop = false
     ) {
         App(
             onChangeFocusable = { isFocusable ->

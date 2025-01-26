@@ -36,6 +36,12 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "CredFill"
             packageVersion = "1.0.0"
+
+            windows {
+                menuGroup = "CredFillApp"
+                upgradeUuid = "123e4567-e89b-12d3-a456-426614174000"
+//                iconFile.set(project.file("src/main/resources/icon.ico")) // Optional: Custom icon
+            }
         }
     }
 }
